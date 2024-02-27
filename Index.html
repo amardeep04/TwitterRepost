@@ -1,0 +1,71 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Twitter Repost Checker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    #result {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <label for="twitterLink">Twitter Link:</label>
+  <input type="text" id="twitterLink" placeholder="Enter Twitter Link">
+
+  <label for="usernames">Twitter Usernames (comma-separated):</label>
+  <input type="text" id="usernames" placeholder="Username1, Username2, ...">
+
+  <button onclick="checkReposts()">Check Reposts</button>
+
+  <div id="result"></div>
+
+  <script>
+    function checkReposts() {
+  const twitterLink = document.getElementById('twitterLink').value;
+  const usernames = document.getElementById('usernames').value.split(',').map(username => username.trim());
+
+  const apiKey = 'wnc57TlZWMCE3Zhn7KikmrD68';
+  const apiUrl = `https://api.twitter.com/2/tweets?ids=${encodeURIComponent(twitterLink)}&expansions=retweeted_by.id`;
+console.log('Attempting to fetch data from Twitter API');
+  fetch(apiUrl, {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+    },
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    return response.json();
+  })
+  .then(data => {
+    const repostedUsernames = data.includes.retweeted_by.map(user => user.username);
+    const unrepostedUsernames = usernames.filter(username => !repostedUsernames.includes(username));
+
+    const resultDiv = document.getElementById('result');
+    resultDiv.innerHTML = `<p>Users who reposted: ${repostedUsernames.join(', ')}</p>`;
+    resultDiv.innerHTML += `<p>Users who did not repost: ${unrepostedUsernames.join(', ')}</p>`;
+  })
+  
+  .catch(error => {
+    console.error('Error fetching data from Twitter API:', error);
+  });
+}
+
+  </script>
+</body>
+</html>
